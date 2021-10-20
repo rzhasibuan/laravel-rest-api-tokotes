@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+//Route::get('your-firstname', fn () => response()->json(['name' => 'reza']));
+//Route::get('your-lastname', fn () => response()->json(['name' => 'hasibuan']));
+
+Route::apiResource('products', \App\Http\Controllers\ProductController::class);
