@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ProductResource;
+use App\Http\Resources\SingleProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -14,9 +16,10 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $product = Product::paginate(10);
+//        $product = Product::paginate(10);
+        return ProductResource::collection(Product::paginate(10));
 
-        return response()->json($product);
+//        return response()->json($product);
     }
 
     /**
@@ -38,7 +41,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        return $product;
+        return new SingleProductResource($product);
     }
 
     /**
