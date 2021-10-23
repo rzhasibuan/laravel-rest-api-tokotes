@@ -9,6 +9,9 @@ class Product extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+//    berfungsi untuk menambahkan semua yang ada di dalam field karna di dalamnya ada array kosong
+
     public function getRouteKeyName()
     {
         return 'slug';
