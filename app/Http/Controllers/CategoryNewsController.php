@@ -14,7 +14,7 @@ class CategoryNewsController extends Controller
      */
     public function index()
     {
-
+        return CategoryNews::paginate(5);
     }
 
     /**
