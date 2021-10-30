@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\SingleCategoryNewsResource;
 use App\Models\CategoryNews;
 use Illuminate\Http\Request;
 
@@ -36,8 +37,11 @@ class CategoryNewsController extends Controller
      */
     public function show(CategoryNews $categoryNews)
     {
-        //
+        return new SingleCategoryNewsResource($categoryNews);
+//        return $categoryNews;
+//        return "hello this code is running";
     }
+
 
     /**
      * Update the specified resource in storage.

@@ -19,5 +19,5 @@ use Illuminate\Support\Facades\Route;
 
 Route::apiResource('products', \App\Http\Controllers\ProductController::class);
 Route::apiResource('category', \App\Http\Controllers\CategoryController::class);
-Route::apiResource('news-category', \App\Http\Controllers\CategoryNewsController::class);
+Route::apiResource('category-news', \App\Http\Controllers\CategoryNewsController::class);
 
