@@ -135,4 +135,106 @@ php artisan migrate:fresh --seed
 // berfungsi untuk migration factory yang telah kita tambahkan pada seeder tadi 
 ```
 
+## Menambahkan CRUD pada category and product 
 
+### Tambahkan controller category and product
+```phpt
+php artisan make:controller CategoryController --api --model=Category
+php artisan make:controller ProductController --api --model=Product 
+
+// kode tersebut berfungsi untuk membuat controller resource api 
+```
+
+### Menambahkan controller resource pada route api
+tambahkan kode berikut ini kedalam directory routes api.php
+
+```phpt
+Route::apiResource('products', \App\Http\Controllers\ProductController::class);
+Route::apiResource('category', \App\Http\Controllers\CategoryController::class);
+
+// kode tersebut berfungsi untuk membuat route pada controller yang telah kita buat 
+```
+
+### melihat list pada route yang telah dibuat 
+```phpt
+php artisan route:list --compact 
+```
+
+### show data pada category 
+buka file CategoryController.php 
+pada bagian method index tambhakan kode berikut ini 
+```phpt
+public function index()
+{
+    Return Category::all(); 
+    // berfungsi untuk menampilkan seluruh data yang ada di dalam table
+  
+    Return Category::get(); 
+    // sama halnya juga dengan all dapat menampilkan seluruh data di dalam sebuah table 
+    
+    Return Category::paginate(10);
+    // berfungsi dalam menampilkan sebuah data ke dalam bentuk pagination 
+    
+    //bisa sesuai kebutuhan kita dalam menampilkan sebuah data 
+}
+```
+
+
+### show spesifik data category 
+pada method show tambahkan kode berikut ini 
+```phpt
+public function show(Category $category)
+{
+    return $category;
+}
+```
+
+kode di atas yang sering dilakukan pada umumnya dalam menampilkan spesifik data 
+tetapi kita juga dapat mengcustome apa saja yang ingin kita tampilkan. 
+dengan cara membuat resource file, caranya seperti dibawah ini.
+
+```phpt
+php artisan make:resource SingleCategoryResource
+```
+setelah singleCategoryResource.php berhasil kita buat maka langsung open file tersebut 
+pada bagian method toArray tambahkan kode berikut ini
+```phpt
+public function toArray($request)
+{
+    return [
+        'id' = $this->id,
+        'name' = $this->name,
+        'slug' = $this->slug,
+        'create' = $this->created_at->format('d, F y'),
+    ];
+}
+```
+kemudian instansiasi kode tersebut kedalam controller category pada bagian medhod show tadi
+
+```phpt
+public function show(Category $category)
+{
+    return $category;
+}
+
+```
+rubah kode yang semulanya seperti diatas ini menjadi seperti dibawah ini
+```phpt
+public function show(Category $category)
+{
+    return new SingleCategoryResource($category)
+}
+
+// kode tersebut berfungsi untuk instansiasi class SingleCategoryResource yang sebelumnya telah kita buat 
+```
+maka output json nya akan seperti dibawah ini 
+```phpt
+    "data" : [
+        {
+            "id" : 1,
+            "name" : "ini adalah neme category",
+            "slug" : "ini-adalah-slug-category",
+            "create" : "11 november 2021"
+        }
+    ]
+```
