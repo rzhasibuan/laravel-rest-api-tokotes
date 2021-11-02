@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CategoryRequest;
 use App\Http\Resources\CategorySingleResource;
 use App\Models\Category;
+use http\Env\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -55,21 +56,33 @@ class CategoryController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Category  $category
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, Category $category)
+    public function update(CategoryRequest $request, Category $category)
     {
-        //
+        $attributes = $request->toArray();
+        $attributes['slug'] = Str::slug($request->name. '-' . time());
+        $category->update($attributes);
+//        $category->update([
+//            'name' => $request->name,
+//            'slug' => Str::slug($request->name. '-' . time())
+//        ]);
+
+        return response()->json([
+            'message' => 'Category has been updated',
+            'Category' => new CategorySingleResource($category)
+        ]);
+
     }
 
     /**
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\Category  $category
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Category $category)
     {
-        //
+//
     }
 }
