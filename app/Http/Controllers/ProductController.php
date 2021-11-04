@@ -69,11 +69,18 @@ class ProductController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, Product $product)
+    public function update(ProductRequest $request, Product $product)
     {
-        //
+        $attributes = $request->toArray();
+        $attributes['slug'] = Str::slug($request->name . '-' . time());
+        $product->update($attributes);
+
+        return response()->json([
+            'message' => 'Product has been updated',
+            'product' => new SingleProductResource($product)
+        ]);
     }
 
     /**
