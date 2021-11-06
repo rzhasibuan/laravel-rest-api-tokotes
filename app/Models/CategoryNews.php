@@ -9,6 +9,8 @@ class CategoryNews extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+
     public function toArray()
     {
         return [

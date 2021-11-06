@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CategoryNewsRequest;
 use App\Http\Resources\SingleCategoryNewsResource;
 use App\Models\CategoryNews;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class CategoryNewsController extends Controller
 {
@@ -22,11 +24,21 @@ class CategoryNewsController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(CategoryNewsRequest $request)
     {
-        //
+
+        $categoryNews = CategoryNews::create([
+            'name' => $request->name,
+            'slug' => Str::slug($request->name . '-' . time())
+        ]);
+
+        return response()->json([
+            'message' => 'Category news has been updated',
+            'category-news' => new SingleCategoryNewsResource($categoryNews)
+        ]);
+
     }
 
     /**
@@ -52,7 +64,7 @@ class CategoryNewsController extends Controller
      */
     public function update(Request $request, CategoryNews $categoryNews)
     {
-        //
+        return "update";
     }
 
     /**
