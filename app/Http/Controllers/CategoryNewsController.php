@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CategoryNewsRequest;
 use App\Http\Resources\SingleCategoryNewsResource;
 use App\Models\CategoryNews;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class CategoryNewsController extends Controller
 {
@@ -60,11 +60,19 @@ class CategoryNewsController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\CategoryNews  $categoryNews
-     * @return \Illuminate\Http\Response
+     * @return string
      */
-    public function update(Request $request, CategoryNews $categoryNews)
+    public function update(CategoryNewsRequest $request, CategoryNews $categoryNews)
     {
-        return "update";
+        $attributes = $request->toArray();
+        $attributes['slug'] = Str::slug($request->name. '-' . time());
+        $categoryNews->update($attributes);
+
+        return response()->json([
+            'message' => 'Category news has been updated',
+            'Category-news' => new SingleCategoryNewsResource($categoryNews)
+        ]);
+
     }
 
     /**
