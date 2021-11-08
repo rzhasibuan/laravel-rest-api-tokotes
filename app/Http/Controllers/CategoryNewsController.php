@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CategoryNewsRequest;
 use App\Http\Resources\SingleCategoryNewsResource;
 use App\Models\CategoryNews;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -79,10 +80,21 @@ class CategoryNewsController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\CategoryNews  $categoryNews
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(CategoryNews $categoryNews)
     {
-        //
+
+        try{
+            $categoryNews->delete();
+
+            return response()->json([
+                'message' => 'Categry news has been deleted',
+            ]);
+        }catch (QueryException $e){
+            return response()->json([
+                'message' => 'Cannot delete this data'
+            ]);
+        }
     }
 }
