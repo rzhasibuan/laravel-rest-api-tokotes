@@ -1,65 +1,240 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Membangun rest-api dengan mengunakan laravel
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## installasi dan confirguration project laravel
 
-## About Laravel
+### install project
+```phpt
+composer create-project --prefer-dist laravel/laravel api.toko   
+```
+### confirgurasi project
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+```phpt
+pada file .env tambahkan database kita 
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=databaseprojectkita
+DB_USERNAME=root
+DB_PASSWORD=password
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### migrate project
+```phpt
+php artisan migrate
+```
+## Add table ke dalam database
+### buat model dan migration beserta factory
+```phpt
+ php artisan make:model Category -mf
+ php artisan make:model Product -mf
+```
 
-## Learning Laravel
+### migration file
+buka file migration yang telah kita buat tadi dan tambahkan kode seperti dibawah ini
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+```phpt
+migration file category.php
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Schema::create('categories', function (Blueprint $table) {
+    $table->id();
+    $table->string('name');
+    $table->string('slug')->unique();
+    $table->timestamps();
+});
 
-## Laravel Sponsors
+// berfungsi untuk membuat table categories 
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+```phpt
+migration file product.php
 
-### Premium Partners
+Schema::create('products', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('category_id')->constrained();
+    $table->string('name');
+    $table->string('slug')->unique();
+    $table->double('price');
+    $table->text('description');
+    $table->timestamps();
+});
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[CMS Max](https://www.cmsmax.com/)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+// berfungsi untuk membuat table product 
+```
+### buat relasi antar table category dan product
+hubungan relasi antara category dan product adalah one to many
+karna satu buah category dapat memiliki banyak product tetapi satu product hanya dapat memilkiki 1 category saja
+#### Buka Model
+pada model category tambahkan method berikut
+```phpt
+model Category.php
 
-## Contributing
+public function products()
+{
+    return $this->hasMany(Product::class);
+}
+```
+kemudian tambahkan method berikut pada Product
+```phpt
+model Product.php
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+public function category()
+{
+    return $this->belongsTo(Category::class);
+}
+```
+### migrate fresh
+```phpt
+php artisan migrate:fresh
+//berfungsi untuk merefresh migration yang sebelumnya pernah kita lakukan 
+```
 
-## Code of Conduct
+### Kemudian tambahkan dummy data dengan factory
+buka file pada directory factory dan tambahkan dummy data seperti dibawah ini
+```phpt
+CategoryFactory.php
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+// tambahkan kode dibawah ini pada method definition 
+return [
+    'name' => $name = $this->faker->sentence,
+    'slug' => Str::slug($name),
+];
 
-## Security Vulnerabilities
+// kode tersebut berfungsi untuk menambahkan data dummy kedalam table category yang telah kita buat sebelumnya 
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```phpt
+ProductFactory.php
 
-## License
+// tambahkan kode dibawah ini pada method definition 
+return [
+    'category_id' => Category::factory(),
+    'name' => $name = $this->faker->sentence,
+    'slug' => Str::slug($name),
+    'description'=> $this->faker->paragraph(25),
+    'price' => rand(111111,999999),
+];
+// kode berikut ini juga berfungsi untuk menambahkan data dummy 
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### tambahkan factory data tadi kedalam seeders
+buka DatabaseSeeder kemudian tambahkan kode seperti dibawah ini
+```phpt
+// tambahkan kode berikut ini pada method up 
+
+Category::factory(10)->hasProducts(5)->create();
+
+// fungsinya adalah untuk menambahkan 10 buah data category ke dalam table category,
+// dan menambahkan 5 buah data kedalam masing-masing id pada category tadi,
+// sehingga nantinya kita akan memiliki 50 buah data kedalam table product 10x5 = 50 
+```
+### migration pada seeder
+```phpt
+php artisan migrate:fresh --seed
+
+// berfungsi untuk migration factory yang telah kita tambahkan pada seeder tadi 
+```
+
+## Menambahkan CRUD pada category and product
+
+### Tambahkan controller category and product
+```phpt
+php artisan make:controller CategoryController --api --model=Category
+php artisan make:controller ProductController --api --model=Product 
+
+// kode tersebut berfungsi untuk membuat controller resource api 
+```
+
+### Menambahkan controller resource pada route api
+tambahkan kode berikut ini kedalam directory routes api.php
+
+```phpt
+Route::apiResource('products', \App\Http\Controllers\ProductController::class);
+Route::apiResource('category', \App\Http\Controllers\CategoryController::class);
+
+// kode tersebut berfungsi untuk membuat route pada controller yang telah kita buat 
+```
+
+### melihat list pada route yang telah dibuat
+```phpt
+php artisan route:list --compact 
+```
+
+### show data pada category
+buka file CategoryController.php
+pada bagian method index tambhakan kode berikut ini
+```phpt
+public function index()
+{
+    Return Category::all(); 
+    // berfungsi untuk menampilkan seluruh data yang ada di dalam table
+  
+    Return Category::get(); 
+    // sama halnya juga dengan all dapat menampilkan seluruh data di dalam sebuah table 
+    
+    Return Category::paginate(10);
+    // berfungsi dalam menampilkan sebuah data ke dalam bentuk pagination 
+    
+    //bisa sesuai kebutuhan kita dalam menampilkan sebuah data 
+}
+```
+
+
+### show spesifik data category
+pada method show tambahkan kode berikut ini
+```phpt
+public function show(Category $category)
+{
+    return $category;
+}
+```
+
+kode di atas yang sering dilakukan pada umumnya dalam menampilkan spesifik data
+tetapi kita juga dapat mengcustome apa saja yang ingin kita tampilkan.
+dengan cara membuat resource file, caranya seperti dibawah ini.
+
+```phpt
+php artisan make:resource SingleCategoryResource
+```
+setelah singleCategoryResource.php berhasil kita buat maka langsung open file tersebut
+pada bagian method toArray tambahkan kode berikut ini
+```phpt
+public function toArray($request)
+{
+    return [
+        'id' = $this->id,
+        'name' = $this->name,
+        'slug' = $this->slug,
+        'create' = $this->created_at->format('d, F y'),
+    ];
+}
+```
+kemudian instansiasi kode tersebut kedalam controller category pada bagian medhod show tadi
+
+```phpt
+public function show(Category $category)
+{
+    return $category;
+}
+
+```
+rubah kode yang semulanya seperti diatas ini menjadi seperti dibawah ini
+```phpt
+public function show(Category $category)
+{
+    return new SingleCategoryResource($category)
+}
+
+// kode tersebut berfungsi untuk instansiasi class SingleCategoryResource yang sebelumnya telah kita buat 
+```
+maka output json nya akan seperti dibawah ini
+```phpt
+    "data" : [
+        {
+            "id" : 1,
+            "name" : "ini adalah neme category",
+            "slug" : "ini-adalah-slug-category",
+            "create" : "11 november 2021"
+        }
+    ]
+```
