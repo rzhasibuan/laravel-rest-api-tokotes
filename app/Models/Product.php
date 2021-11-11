@@ -12,10 +12,10 @@ class Product extends Model
     protected $guarded = [];
 //    berfungsi untuk menambahkan semua yang ada di dalam field karna di dalamnya ada array kosong
 
-    public function getRouteKeyName()
-    {
-        return 'slug';
-    }
+//    public function getRouteKeyName()
+//    {
+//        return 'slug';
+//    }
 
     public function category()
     {
