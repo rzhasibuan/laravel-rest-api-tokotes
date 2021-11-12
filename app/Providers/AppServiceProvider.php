@@ -25,7 +25,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
 //        $this->registerPolicies();
-        JsonResource::withoutWrappinssg();
+        JsonResource::withoutWrapping();
         Gate::before(function ($user, $ability){
            $user->hasRole('admin') ? true : null;
         });

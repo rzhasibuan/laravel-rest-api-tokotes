@@ -427,7 +427,7 @@ pada app/http/karnel.php
 ```
 
 ### implementasi sanctum
-pertama buka model User.php dan tambahkan hasApiToken pada bagian use yang ada di dalam class User
+buka model User.php dan tambahkan hasApiToken pada bagian use yang ada di dalam class User
 
 ### generate token 
 pertama kita harus buat controller baru
@@ -440,5 +440,145 @@ route::post('token/generator', TokenGeneratorController::class);
 ```
 kemudian selanjutnya buka controller TokenGeneratorController dan tambahkan method seperti dibawah ini
 ```phpt
+public function __invoke(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
 
+    $user = User::where('email', $request->email)->first();
+
+    if (! $user || ! Hash::check($request->password, $user->password)) {
+        throw ValidationException::withMessages([
+            'email' => ['The provided credentials are incorrect.'],
+        ]);
+    }
+
+    return $user->createToken('web')->plainTextToken;
+}
 ```
+untuk mengecek apakah token nya berhasil di generate atau tidak kita bisa masuk ke postman
+mengunakan alamat http://api.toko.test/api/token/generate dengan method post serta mengirimkan body json seperti dibawah ini
+
+```phpt
+{
+    "email" : "emailyangterdaftar@domain.com",
+    "password" : "password"
+}
+```
+kemudian send jika berhasil maka akan ada tampil body seperti dibawah ini
+```phpt
+1|CS3Ol0hqNRWYPT4Cptg00XKYyCKyj0BBetwNhc0V
+```
+### buat table role
+setelah kita membuat sebuah token kita juga membutuhkan sebuah role untuk memvalidasi apakah yang mengakses admin ataukah editor
+```phpt
+// jalankan perintah berikut ini
+php artisan make:model Role -m
+```
+setelah itu buka file migration yang telah kita buat dan tambahkan script seperti dibawah ini
+```phpt
+public function up()
+{
+    Schema::create('roles', function (Blueprint $table) {
+        $table->id();
+        $table->string('name');
+        $table->timestamps();
+    });
+    
+    // table dibawah ini adalah pivot table yang berguna untuk mengabungkan relasi many to many antara table users dan roles 
+    Schema::create('role_user', function (Blueprint $table) {
+       $table->foreignId('user_id')->constrained();
+       $table->foreignId('role_id')->constrained();
+       $table->primary(['user_id','role_id']);
+    });
+}
+```
+kemudian lakukan migrate:fresh 
+### buat relasi many to many
+untuk membuat relasi many to many kita masuk kedalam mode User.php dan tambahkan script seperti dibawah ini
+```phpt
+public function roles()
+{
+    return $this->belongsToMany(Role::class, 'role_user');
+}
+```
+### buat dummy data untuk test roles dengan UserSeeder
+jalankan perintah 
+```phpt
+php artisan make:seed UserSeeder
+```
+kemudian buka file UserSeeder.php
+dan tambahkan script dibawah ini
+```phpt
+ public function run()
+    {
+        collect([
+            [
+                'name' => 'reza',
+                'email' => 'rzhasibuan@gmail.com',
+                'password' => bcrypt('password'),
+                'email_verified_at' => now(),
+            ],
+            [
+                'name' => 'ranggie viona zubainadah',
+                'email' => 'ranggie@gmail.com',
+                'password' => bcrypt('password'),
+                'email_verified_at' => now(),
+            ],
+            [
+                'name' => 'indra setiawan',
+                'email' => 'donok@gmail.com',
+                'password' => bcrypt('password'),
+                'email_verified_at' => now(),
+            ]
+        ])->each(function ($user) {
+            User::create($user);
+        });
+        // fungsi each disini untuk melakukan perulangan sebanyak data array yang ada
+        // kemudian di simpan di dalam table user
+
+        collect(['admin','editor'])->each(function ($role){
+            Role::create(['name' => $role]);
+        });
+        // collect di atas untuk membuat atau mengisi table roles dengan field admin dan editor yang di simpan kedalam table Role
+  
+        User::find(1)->roles()->attach([1]);
+        User::find(2)->roles()->attach([2]);
+        // fungsi find() untuk mencari id pada table user dan user mana yang ingin kita tambakan sebuah roles
+        // fungsi roles()->attach([1]) adalah untuk nambahkan sebuah roles dari relasi many to many yang telah kita buat
+        // attach([1]) yang berarti memasukkan 1 yang berupa admin kedalam pivot tables role_user   
+    }
+```
+kemudian setelah itu jalankan artisan:seed 
+```phpt
+php artisan db:seed --class=UserSeeder
+```
+jika berhasil data akan masuk ke dalam tables roles dan table role_user serta bertambah 3 buah user di table users
+
+### buat fungsi pengecekan roles dengan menambahkan hasRole pada model User.php dan pada AppServiceProvider.php
+```phpt
+public function hasRole($role)
+{
+    return $this->roles()->where('name', $role)->exists();
+    // berfungsi untuk mencari name pada role yang kelak method nya akan di panggil kedalam method Gate
+}
+```
+dan tambahkan perintah berikut ini kedalam AppServiceProvider.php di bagian method boot
+```phpt
+Gate::before(function ($user, $ability){
+   $user->hasRole('admin') ? true : null;
+});
+// yang berfungsi jika has role user sama dengan admin maka hasilnya adalah true
+```
+untuk melakukan simulasi pengecekannya kita bisa mengunakan tinker
+```phpt
+php artisan tinker
+>>> $user = User::find(1);
+>>> $user->hasRole('admin');
+=> true // jika benar user dengan id 1 memiliki roles sebagai admin maka hasilnya true
+=> false // dan jika tidak maka akan menampilkan false
+```
+
+### implementasikan roles tersebut kedalam setiap project

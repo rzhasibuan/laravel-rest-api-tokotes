@@ -24,8 +24,6 @@ class CreateRolesTable extends Migration
            $table->foreignId('role_id')->constrained();
            $table->primary(['user_id','role_id']);
         });
-
-
     }
 
     /**
