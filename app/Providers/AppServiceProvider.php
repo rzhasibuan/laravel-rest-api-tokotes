@@ -31,7 +31,11 @@ class AppServiceProvider extends ServiceProvider
             $user->hasRole('admin');
         });
 
-        Gate::define('if_moderator', fn(User $user) => $user->hasRole('moderator'));
+        Gate::define('if_moderator', function (User $user){
+            $user->hasRole('moderator');
+        });
+
+//        Gate::define('if_moderator', fn(User $user) => $user->hasRole('moderator'));
 
         Gate::before(function ($user, $ability)
         {

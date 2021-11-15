@@ -22,3 +22,4 @@ Route::apiResource('category', \App\Http\Controllers\CategoryController::class);
 Route::apiResource('category-news', \App\Http\Controllers\CategoryNewsController::class);
 
 Route::post('token/generator', \App\Http\Controllers\TokenGeneratorController::class)->name('token.store');
+Route::get('products-search', \App\Http\Controllers\ProductSearchController::class);

@@ -8,7 +8,6 @@ use App\Http\Resources\SingleProductResource;
 use App\Models\Product;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ProductController extends Controller
 {
