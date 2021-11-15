@@ -581,4 +581,70 @@ php artisan tinker
 => false // dan jika tidak maka akan menampilkan false
 ```
 
-### implementasikan roles tersebut kedalam setiap project
+### implementasikan roles tersebut kedalam project
+pertama kita implementasikan role tersebut kedalam ProductController.php dan tambahkan method construct untuk memberikan middleware
+```phpt
+public function __construct()
+{
+    $this->middleware('auth:sanctum')->except(['index','show']);
+}
+```
+### buat token dan create data 
+buat token pada postman sesuai dengan user yang telah kita buat tadi sebelumnya
+caranya masuk kedalam postman dan akses url http://api.toko.test/api/token/generator
+dan kemudian tambahkan raw json pada body seperti dibawah ini:
+````phpt
+{
+    "email" : "rzhasibuan@gmail.com",
+    "password" : "password"
+}
+````
+selanjutnya kita bisa coba simulasikan untuk menambahkan data kedalam rest api kita. 
+dan disini email yang bernama rzhasibuan@gmail.com memiliki role sebagai admin yang sebelumnya telah kita tambahkan di atas.
+jangan lupa copy token yang telah kita buat tadi dan buka kembali postman nya pada url http://api.toko.test/api/product dengan method post 
+```phpt
+{
+    "category_id" : 2,
+    "name" : "product 1",
+    "price" : 1500000,
+    "description" : "ini product sangat bagus"
+}
+// tambahkan body pada raw json seperti di atas
+```
+selanjutnya pada **authorization** pilih **bearer token** pada **type** dan masukkan **token** yang telah kita buat tadi sebelumnya 
+setelah itu kita bisa test **send** untuk menambahkan datanya.
+
+jika berhasil maka akan seperti dibawah ini
+
+```phpt
+{
+    "status": "oke",
+    "message": "Product has been created",
+    "product": {
+        "id": 56,
+        "name": "product 1",
+        "slug": "product-1-1638982953",
+        "price": "1.500.000",
+        "actual_price": 1500000,
+        "description": "ini product sangat bagus",
+        "created": "08 December, 2021"
+    }
+}
+```
+selanjutnya kita bisa simulasikan menambahkan data dengan akun yang berbeda melalui token yang baru
+
+buka postman kembali tambahkan akun seperti dibawah dan kemudian copy token nya yang telah berhasil di generate.
+```phpt
+{
+    "email" : "ranggie@gmail.com",
+    "password" : "password"
+}
+```
+rubah token yang ada pada **authorization** dengan token yang baru kita buat kemudian send
+```phpt
+{
+    "message": "Unauthenticated."
+}
+```
+hasilnya akan seperti di atas, itu terjadi karna kita sebelumnya belum menambahkan gete untuk moderator kedalam **AppServiceProvider.php**
+jika kita sudah mendefinisikan gate moderator pada **AppServiceProvider.php** maka tidak akan terjadi seperti itu. selanjutnya kita akan menambahakn nya pada **AppServiceProvider.php** dan **ProductController.php** juga

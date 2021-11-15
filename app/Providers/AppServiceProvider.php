@@ -27,13 +27,13 @@ class AppServiceProvider extends ServiceProvider
     {
         JsonResource::withoutWrapping();
 
-        Gate::define('if_admin', function (User $user){
-            $user->hasRole('admin');
-        });
-
-        Gate::define('if_moderator', function (User $user){
-            $user->hasRole('moderator');
-        });
+//        Gate::define('if_admin', function (User $user){
+//            $user->hasRole('admin');
+//        });
+//
+//        Gate::define('if_moderator', function (User $user){
+//            $user->hasRole('moderator');
+//        });
 
 //        Gate::define('if_moderator', fn(User $user) => $user->hasRole('moderator'));
 
