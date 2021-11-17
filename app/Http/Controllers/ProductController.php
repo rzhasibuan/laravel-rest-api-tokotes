@@ -45,7 +45,7 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request)
     {
-//        $this->authorize('if_moderator');
+        $this->authorize('if_moderator');
 
         try{
             if ($request->price < 10000) {
@@ -102,7 +102,7 @@ class ProductController extends Controller
      */
     public function update(ProductRequest $request, Product $product)
     {
-//        $this->authorize('if_admin');
+        $this->authorize('if_admin');
 
         $attributes = $request->toArray();
         $attributes['slug'] = Str::slug($request->name . '-' . time());
@@ -123,7 +123,7 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-//        $this->authorize('if_admin');
+        $this->authorize('if_admin');
 
         $product->delete();
 
