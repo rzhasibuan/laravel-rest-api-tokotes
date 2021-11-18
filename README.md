@@ -648,3 +648,41 @@ rubah token yang ada pada **authorization** dengan token yang baru kita buat kem
 ```
 hasilnya akan seperti di atas, itu terjadi karna kita sebelumnya belum menambahkan gete untuk moderator kedalam **AppServiceProvider.php**
 jika kita sudah mendefinisikan gate moderator pada **AppServiceProvider.php** maka tidak akan terjadi seperti itu. selanjutnya kita akan menambahakn nya pada **AppServiceProvider.php** dan **ProductController.php** juga
+
+### Merubah AppServiceProvider.php dan manambahkan role kedalam ProductController.php
+selanjutnya kita akan merubah AppServiceProvider.php dan menambahkan admin dan moderator
+```phpt
+Gate::before(function ($user, $ability){
+   $user->hasRole('admin') ? true : null;
+});
+```
+rubah script di atas menjadi seperti dibawah ini
+```phpt
+Gate::define('if_admin', function (User $user){
+    $user->hasRole('admin');
+});
+// fungsi di atas berfungsi untuk mendefinisikan if_admin memiliki role sebagai admin
+
+Gate::define('if_moderator', function (User $user){
+    $user->hasRole('moderator');
+});
+// dan fungsi di atas adalah untuk mendifinisikan if_moderator memiliki role moderator
+
+Gate::before(function ($user, $ability)
+{
+    if($user->hasRole('admin')) {
+        return true;
+    }
+    // fungsi ini adalah apapun bisa di lakukan oleh admin 
+});
+```
+selanjutnya tambahkan if_moderator kedalam ProductController
+```phpt
+$this->authorize('if_moderator');
+// tambahkan fungsi berikut pada method store tepat di bagian atas 
+// fungsinya adalah untuk authorisasi bahwa moderator diperbolehkan
+// untuk menambahkan sebuah data kedalam product. 
+// dan jika kita ingin mengijinkan moderator untuk merubah sebuah data pada product kita bisa tambahkan fungsi tersibut pada update
+```
+selajutnya coba kembali menambahkan sebuah data dengan mengunakan postman pasti berhasil.
+
