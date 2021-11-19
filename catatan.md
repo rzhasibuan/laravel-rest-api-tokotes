@@ -686,3 +686,31 @@ $this->authorize('if_moderator');
 ```
  selajutnya coba kembali menambahkan sebuah data dengan mengunakan postman pasti berhasil.
 
+## tambahkan fitur pencarian pada product
+
+### buat controller product search
+```phpt
+php arisan make:controller ProductSearchController -i
+// min i yang berarti invoker
+```
+kemudian buka product search pada method invoker tambahkan script di bawah in
+```phpt
+public function __invoke(Request $request)
+{
+    $query = $request->q;
+    $products = Product::where('name','LIKE',"%$query%")->paginate(5);
+    return ProductResource::collection($products);
+}
+```
+
+### add routes pada api.php
+tambahkan route pada api.php seperti dibawah ini
+```phpt
+Route::get('products-search', \App\Http\Controllers\ProductSearchController::class);
+```
+
+### pengujian bisa dengan postman
+```phpt
+api.toko.test/api/products-search?q=apa-yang-ingin-dicari
+// disini kita mengunakan parameter q 
+```
